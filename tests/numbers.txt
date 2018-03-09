@@ -1,0 +1,4 @@
+number printed regulary:                   42
+number printed using strconv, decimal:     42
+number printed using strconv, hexadecimal: 2a
+number printed using strconv, octal:       52

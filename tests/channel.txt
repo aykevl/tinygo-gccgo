@@ -1,0 +1,3 @@
+create channel and goroutine
+number of messages: 10
+sum of messages:    45

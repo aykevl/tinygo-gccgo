@@ -1,0 +1,8 @@
+test slice:
+slice contains: 0 1 2 3 4 5 6 7 8 9
+slice has 10 members and a capacity of 16
+
+test map:
+map has member number with value 42
+value: 42
+after deletion, map has 0 members

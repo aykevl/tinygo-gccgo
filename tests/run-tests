@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# cd to script directory
+# https://stackoverflow.com/a/3355423/559350
+cd "$(dirname "$0")"
+
+for test in *.txt; do
+    test=${test%.txt} # strip .txt extension
+    (cd ..; make PKG=$test test-pkg)
+done
+
+echo "All tests were successful"

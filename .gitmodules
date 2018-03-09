@@ -1,0 +1,4 @@
+[submodule "gofrontend"]
+	path = gofrontend
+	url = git@github.com:aykevl/gofrontend.git
+	branch = tinygo

@@ -38,7 +38,7 @@ bool tinygo_print_stackitem(goroutine_t *r, uint32_t *pc_top, uint32_t *pc_call,
 		printf("\?\?\?(...)");
 	}
 	printf(" at %p\n", pc_top);
-	printf("\t%p (+0x%lx, stack usage: %lu/%u)\n", pc_call - 1, ((pc_call - pc_top - 1) * sizeof(func)), (STACK_SIZE-sp*sizeof(uintptr_t)), STACK_SIZE);
+	printf("\t%p (+0x%tx, stack usage: %ld/%u)\n", pc_call - 1, ((pc_call - pc_top - 1) * sizeof(func)), (long)(STACK_SIZE-sp*sizeof(uintptr_t)), STACK_SIZE);
 	return found_root;
 }
 

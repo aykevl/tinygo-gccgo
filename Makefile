@@ -12,7 +12,7 @@ OUT = $(BUILD)/$(PKG)
 .PHONY: all clean run mkdir test test-pkg
 
 # Various common flags for GCC.
-FLAGS=-Os -g -Wall -Werror -fomit-frame-pointer -Igofrontend/libgo/runtime -Isrc/runtime
+FLAGS=-Os -g -Wall -Werror -fomit-frame-pointer -I$(GOFRONTEND)/libgo/runtime -Isrc/runtime
 
 CFLAGS = $(FLAGS)
 GOFLAGS = $(FLAGS) -fno-split-stack
@@ -49,9 +49,12 @@ run: all
 # Find all the dependencies of the main package.
 PKGDEPS = $(shell go list -f '{{ join .Imports " " }}' ./src/$(PKG))
 
+# Where the gofrontend is located (usually in the git submodule).
+GOFRONTEND = ./gofrontend
+
 # Which sources should be used for Go dependencies.
 #PKGROOT = /usr/share/go-1.7/src
-PKGROOT = gofrontend/libgo/go
+PKGROOT = $(GOFRONTEND)/libgo/go
 
 # Directories required during the build. Will be created by mkdir at the start.
 DIRS = \
@@ -111,7 +114,7 @@ SRC_C_TINYGO = \
 # built all at once, or there will be undefined variables and such.
 SRC_GO_RUNTIME += \
 	src/runtime/runtime.go \
-	gofrontend/libgo/go/runtime/error.go
+	$(GOFRONTEND)/libgo/go/runtime/error.go
 
 # Build a single runtime.o for all Go sources.
 $(BUILD)/pkg/runtime.o: $(SRC_GO_RUNTIME)
@@ -128,6 +131,11 @@ OBJ_GO += build/pkg/runtime.o
 OBJ += $(OBJ_GO)
 OBJ += $(addprefix $(BUILD)/tinygo/,$(SRC_C_TINYGO:.c=.o))
 OBJ += $(addprefix $(BUILD)/libgo/,$(SRC_C_LIBGO:.c=.o))
+
+ifeq ("$(wildcard $(GOFRONTEND)/libgo)","")
+$(info $(GOFRONTEND) does not exist - try running: git submodule update --init)
+$(error no gofrontend available)
+endif
 
 # Make build directories. Must always run as the first command.
 mkdir:
@@ -152,7 +160,7 @@ $(BUILD)/pkg/unicode.o: $(shell go list -f '{{ range .GoFiles }}$(PKGROOT)/unico
 
 # Build libgo C sources.
 # TODO: this uses gnu99 to work around undefined stack_t
-$(BUILD)/libgo/%.o: gofrontend/libgo/runtime/%.c
+$(BUILD)/libgo/%.o: $(GOFRONTEND)/libgo/runtime/%.c
 	gcc $(CFLAGS) -std=gnu99 -c -o $@ $^
 
 # Build tinygo C sources.

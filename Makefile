@@ -56,6 +56,15 @@ GOFRONTEND = ./gofrontend
 #PKGROOT = /usr/share/go-1.7/src
 PKGROOT = $(GOFRONTEND)/libgo/go
 
+# Find the current architecture.
+# TODO: cross compilation
+ARCH_TUPLE = $(shell gcc -dumpmachine)
+ifneq (,$(findstring arm-,"$(ARCH_TUPLE)"))
+ARCH = "arm"
+else
+ARCH = "other"
+endif
+
 # Directories required during the build. Will be created by mkdir at the start.
 DIRS = \
 	$(BUILD)/tinygo \
@@ -102,7 +111,6 @@ SRC_C_LIBGO += \
 # Runtime C sources from tinygo. These live in src/runtime.
 SRC_C_TINYGO = \
 	tinygo.c \
-	tinygo_arm.c \
 	channel.c \
 	panic.c \
 	libgo-go-iface.c \
@@ -116,9 +124,12 @@ SRC_GO_RUNTIME += \
 	src/runtime/runtime.go \
 	$(GOFRONTEND)/libgo/go/runtime/error.go
 
-# Build a single runtime.o for all Go sources.
-$(BUILD)/pkg/runtime.o: $(SRC_GO_RUNTIME)
-	gccgo $(GOFLAGS) -fgo-pkgpath=runtime -c -o $@ $^
+ifeq ($(ARCH),arm)
+SRC_C_TINYGO += tinygo_arm.c
+SRC_GO_RUNTIME += src/runtime/runtime_arm.go
+else
+SRC_GO_RUNTIME += src/runtime/runtime_other.go
+endif
 
 # Create a lit of all Go package dependencies, stored as $(BUILD)/pkg/*.o
 # files.
@@ -141,7 +152,11 @@ endif
 mkdir:
 	@mkdir -p $(DIRS)
 
-# Build the runtime package.
+# Build a single runtime.o for all Go sources.
+$(BUILD)/pkg/runtime.o: $(SRC_GO_RUNTIME)
+	gccgo $(GOFLAGS) -fgo-pkgpath=runtime -c -o $@ $^
+
+# Build the 'main' package (with program name as filename)
 $(BUILD)/pkg/$(PKG).o: src/$(PKG)/*.go
 	gccgo $(GOFLAGS) -c -o $@ $^ -fgo-relative-import-path=/home/ayke/src/tinygo -I $(BUILD)/pkg
 

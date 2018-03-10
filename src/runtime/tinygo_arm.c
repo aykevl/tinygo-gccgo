@@ -23,3 +23,15 @@ void tinygo_get_code_bounds(uint32_t *args[]) {
 	args[0] = __executable_start;
 	args[1] = __etext;
 }
+
+__attribute__((naked))
+void tinygo_get_lr_sp(uintptr_t *args) {
+	// Capture the current stack pointer and program counter of the
+	// caller. The exact location of the PC shouldn't matter. The stack
+	// pointer shouldn't matter too much either, as long as it's at the
+	// same position captured as the program counter.
+	__asm__ __volatile__(
+		"str lr, [r0, #0]\n"
+		"str sp, [r0, #4]\n"
+		"bx lr\n");
+}

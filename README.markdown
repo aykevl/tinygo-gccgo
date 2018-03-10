@@ -60,15 +60,15 @@ scheduler, memory allocator (no GC yet) and channel send/receive primitives.
 
 There are many.
 
-  * No support for anything except ARM.
   * Works with gccgo 6.3 (Debian stretch), no other compiler versions have been
     tested.
-  * Source files must be placed in a subdirectory of src/.
+  * Source files must be placed in a subdirectory of `src/`.
   * No `recover()`
-  * No function names or line numbers in the `panic()` output. I would like to
-    fix this at some time, but it will increase the binary size if it must work
-    after stripping. It currently outputs the function addresses, which you can
-    look up with `nm` (e.g. `nm -S ./build/example | egrep ' [tT] main\.'`).
+  * No function names or line numbers in the `panic()` output, and no backtraces
+    on anything except ARM. I would like to fix this at some time, but it will
+    increase the binary size if it must work after stripping. It currently
+    outputs the function addresses, which you can look up with `nm` (e.g. `nm -S
+    ./build/example | egrep ' [tT] main\.'`).
   * No garbage collector, yet. Allocated memory is never freed.
   * Many types might not be implemented, but support will probably be pretty
     easy to add by including the correct files from `gofrontend/libgo/runtime`.

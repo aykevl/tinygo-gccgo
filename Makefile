@@ -60,9 +60,9 @@ PKGROOT = $(GOFRONTEND)/libgo/go
 # TODO: cross compilation
 ARCH_TUPLE = $(shell gcc -dumpmachine)
 ifneq (,$(findstring arm-,"$(ARCH_TUPLE)"))
-ARCH = "arm"
+ARCH = arm
 else
-ARCH = "other"
+ARCH = other
 endif
 
 # Directories required during the build. Will be created by mkdir at the start.

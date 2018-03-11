@@ -1,6 +1,10 @@
 
 package runtime
 
+import (
+	"unsafe"
+)
+
 const GOARCH = "arm"
 
 // Choose which undwinder implementation to use. "armdecode" is the one that

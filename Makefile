@@ -9,6 +9,10 @@ PKG ?= hello
 # Define where to put the output binary
 OUT = $(BUILD)/$(PKG)
 
+ifneq ($(V),1)
+Q=@
+endif
+
 .PHONY: all clean run mkdir test test-pkg
 
 # Various common flags for GCC.
@@ -40,10 +44,11 @@ CFLAGS += -fplan9-extensions
 all: mkdir $(OUT)
 
 clean:
-	rm -rf $(BUILD)
+	@echo "RMRF $(BUILD)"
+	$(Q)rm -rf $(BUILD)
 
 run: all
-	@echo RUN $(OUT)
+	@echo "RUN  $(OUT)"
 	@$(OUT)
 
 # Find all the dependencies of the main package.
@@ -154,37 +159,45 @@ mkdir:
 
 # Build a single runtime.o for all Go sources.
 $(BUILD)/pkg/runtime.o: $(SRC_GO_RUNTIME)
-	gccgo $(GOFLAGS) -fgo-pkgpath=runtime -c -o $@ $^
+	@echo "GoC  $@"
+	$(Q)gccgo $(GOFLAGS) -fgo-pkgpath=runtime -c -o $@ $^
 
 # Build the 'main' package (with program name as filename)
 $(BUILD)/pkg/$(PKG).o: src/$(PKG)/*.go
-	gccgo $(GOFLAGS) -c -o $@ $^ -fgo-relative-import-path=/home/ayke/src/tinygo -I $(BUILD)/pkg
+	@echo "GoC  $@"
+	$(Q)gccgo $(GOFLAGS) -c -o $@ $^ -fgo-relative-import-path=/home/ayke/src/tinygo -I $(BUILD)/pkg
 
 # Below here, you can find various packages that may or may not function.
 # Package unicode and strconv are functional, while fmt is unusable (but you
 # can reference symbols in there so it's not completely broken).
 
 $(BUILD)/pkg/fmt.o: $(shell go list -f '{{ range .GoFiles }}$(PKGROOT)/fmt/{{ . }} {{end}}' ./$(PKGROOT)/fmt)
-	gccgo $(GOFLAGS) -c -o $@ $^ -fgo-relative-import-path=/home/ayke/src/tinygo -I $(BUILD)/pkg -fgo-pkgpath=fmt
+	@echo "GoC  $@"
+	$(Q)gccgo $(GOFLAGS) -c -o $@ $^ -fgo-relative-import-path=/home/ayke/src/tinygo -I $(BUILD)/pkg -fgo-pkgpath=fmt
 
 $(BUILD)/pkg/strconv.o: $(shell go list -f '{{ range .GoFiles }}$(PKGROOT)/strconv/{{ . }} {{end}}' ./$(PKGROOT)/strconv)
-	gccgo $(GOFLAGS) -c -o $@ $^ -fgo-relative-import-path=/home/ayke/src/tinygo -I $(BUILD)/pkg -fgo-pkgpath=strconv
+	@echo "GoC  $@"
+	$(Q)gccgo $(GOFLAGS) -c -o $@ $^ -fgo-relative-import-path=/home/ayke/src/tinygo -I $(BUILD)/pkg -fgo-pkgpath=strconv
 
 $(BUILD)/pkg/unicode.o: $(shell go list -f '{{ range .GoFiles }}$(PKGROOT)/unicode/{{ . }} {{end}}' ./$(PKGROOT)/unicode)
-	gccgo $(GOFLAGS) -c -o $@ $^ -fgo-relative-import-path=/home/ayke/src/tinygo -I $(BUILD)/pkg -fgo-pkgpath=unicode
+	@echo "GoC  $@"
+	$(Q)gccgo $(GOFLAGS) -c -o $@ $^ -fgo-relative-import-path=/home/ayke/src/tinygo -I $(BUILD)/pkg -fgo-pkgpath=unicode
 
 # Build libgo C sources.
 # TODO: this uses gnu99 to work around undefined stack_t
 $(BUILD)/libgo/%.o: $(GOFRONTEND)/libgo/runtime/%.c
-	gcc $(CFLAGS) -std=gnu99 -c -o $@ $^
+	@echo "CC   $^"
+	$(Q)gcc $(CFLAGS) -std=gnu99 -c -o $@ $^
 
 # Build tinygo C sources.
 $(BUILD)/tinygo/%.o: src/runtime/%.c
-	gcc $(CFLAGS) -std=c99 -fexceptions -c -o $@ $^
+	@echo "CC   $^"
+	$(Q)gcc $(CFLAGS) -std=c99 -fexceptions -c -o $@ $^
 
 # Link the final executable.
 $(OUT): $(OBJ)
-	gcc $(LDFLAGS) -o $@ $^
+	@echo "LD   $@"
+	$(Q)gcc $(LDFLAGS) -o $@ $^
 
 
 ######################

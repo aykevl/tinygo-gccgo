@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-extern goroutine_t *goroutine __asm__("runtime.GR");
 size_t goroutine_work_counter = 0; // every time work happens, this is incremented
 
 void * tinygo_alloc(size_t size) {

@@ -27,10 +27,17 @@ typedef struct _defer_t {
 	struct _defer_t *next;
 } defer_t;
 
+typedef struct _panic_element_t {
+	struct __go_empty_interface msg;
+	void *retaddr;
+	struct _panic_element_t *next;
+} panic_element_t;
+
 // Must be the same as type goroutine in runtime.go.
 typedef struct _goroutine_t {
 	struct _goroutine_t *next;
 	struct _goroutine_t *prev;
+	panic_element_t     *panicking;
 	size_t     num; // for debugging only
 	void       *created_by;
 	defer_t    *deferred;
@@ -67,3 +74,5 @@ __attribute__((noreturn))
 void runtime_Panic(struct __go_empty_interface msg, bool fatal) __asm__("runtime.Panic");
 
 extern void go_main() __asm__ ("main.main");
+
+extern goroutine_t *goroutine __asm__("runtime.GR");

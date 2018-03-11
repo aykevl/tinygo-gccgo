@@ -57,3 +57,18 @@ void tinygo_unwind(goroutine_t *r, uint32_t *pc, uint32_t *sp) {
 void __go_panic(struct __go_empty_interface msg) {
 	runtime_Panic(msg, false);
 }
+
+struct __go_empty_interface __go_recover() {
+	panic_element_t *top = goroutine->panicking;
+	goroutine->panicking = top->next;
+	return top->msg;
+}
+
+bool __go_can_recover(void *retaddr) {
+	return goroutine->panicking->retaddr == retaddr;
+}
+
+bool __go_set_defer_retaddr(void *retaddr) {
+	goroutine->panicking->retaddr = retaddr;
+	return 0;
+}

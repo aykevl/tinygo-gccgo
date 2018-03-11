@@ -133,6 +133,7 @@ ifeq ($(ARCH),arm)
 SRC_C_TINYGO += tinygo_arm.c
 SRC_GO_RUNTIME += src/runtime/runtime_arm.go
 else
+SRC_C_TINYGO += tinygo_other.c
 SRC_GO_RUNTIME += src/runtime/runtime_other.go
 endif
 

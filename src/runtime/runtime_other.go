@@ -1,6 +1,13 @@
 
 package runtime
 
-func unwind(r *goroutine) {
-	tinygo_unwind_fail(0, "unimplemented")
+const GOARCH = "other"
+
+type stackframe struct {
+	sp int
+	pc uintptr
+}
+
+func unwind_frame(r *goroutine, frame *stackframe) string {
+	return "unimplemented"
 }

@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# cd to script directory
-# https://stackoverflow.com/a/3355423/559350
-cd "$(dirname "$0")"
+# This script must be run using 'make test'.
 
-for test in *.txt; do
-    test=${test%.txt} # strip .txt extension
-    (cd ..; make PKG=$test test-pkg)
+for test in ../../tests/*.txt; do
+    test=$(basename "$test" .txt) # get basename without .txt
+    make --no-print-directory PKG=$test test-pkg
 done
 
 echo "All tests were successful"

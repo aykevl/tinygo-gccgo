@@ -66,6 +66,7 @@ void * tinygo_alloc(size_t size);
 void tinygo_block();
 void __go_panic(struct __go_empty_interface arg);
 void tinygo_deadlocked();
+void tinygo_go(void *fn, void *arg, void *created_by);
 __attribute__((noreturn))
 void tinygo_goroutine_exit();
 void tinygo_run_internal(func fn, void *arg);

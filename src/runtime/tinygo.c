@@ -95,14 +95,6 @@ void tinygo_go(void *fn, void *arg, void *created_by) {
 	}
 }
 
-int main(int argc, char **argv) {
-	tinygo_go(go_main, NULL, NULL);
-	DEBUG_printf("-- starting with %u...\n", goroutine->num);
-	setcontext(&goroutine->context);
-	__builtin_unreachable();
-	return 0;
-}
-
 void * __go_new(void * type, uintptr_t size) {
 	if (size == 0) {
 		return &runtime_zerobase;

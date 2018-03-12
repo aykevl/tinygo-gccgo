@@ -63,7 +63,7 @@ There are many.
   * Works with gccgo 6.3 (Debian stretch), no other compiler versions have been
     tested.
   * Source files must be placed in a subdirectory of `src/`.
-  * No `recover()`
+  * `recover()` has bugs (but seems to work somewhat).
   * No function names or line numbers in the `panic()` output, and no backtraces
     on anything except ARM. I would like to fix this at some time, but it will
     increase the binary size if it must work after stripping. It currently

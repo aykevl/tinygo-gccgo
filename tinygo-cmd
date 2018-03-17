@@ -1,0 +1,130 @@
+#!/usr/bin/python3
+
+import sys
+import os
+import subprocess
+
+TOOLCHAIN = os.environ.get('TOOLCHAIN', '')
+TINYGO = os.path.dirname(os.path.realpath(__file__))
+SDK = os.environ['ESPIDF']
+MCU = os.environ.get('TINYGO_MCU') or None
+LTO = bool(int(os.environ.get('TINYGO_LTO')))
+
+CC    = TOOLCHAIN + 'gcc'
+GCCGO = TOOLCHAIN + 'gccgo'
+AR    = TOOLCHAIN + 'gcc-ar'
+LD    = TOOLCHAIN + 'ld'
+
+
+# Fix up the PATH environment variable.
+# If we don't do this, we might recursively call ourself!
+parts = os.environ['PATH'].split(':')
+if parts[0] != TINYGO + '/bin':
+    raise RuntimeError('cannot fix up PATH variable: ' + os.environ['PATH'])
+os.environ['PATH'] = ':'.join(parts[1:])
+
+# Common GCC flags. See: ports/common/vars.mk
+FLAGS = ['-Wall', '-Werror', '-Os']
+if LTO:
+    FLAGS.extend(['-flto', '-fno-strict-aliasing'])
+else:
+    FLAGS.extend(['-ffunction-sections', '-fdata-sections'])
+
+
+def get_lib_path(name):
+    cmd = subprocess.run([CC, '-print-file-name=' + name], stdout=subprocess.PIPE)
+    if cmd.returncode != 0:
+        sys.exit(cmd.returncode)
+    return cmd.stdout.decode('utf-8').strip()
+
+port = 'unix'
+if MCU == 'esp32':
+    port = 'esp32'
+
+def wrapActionCompileC():
+    # Compiling C code
+    cmd[0] = CC
+    cmd.extend(FLAGS)
+    cmd.append('-I%s/goroot/src/runtime' % TINYGO)
+    cmd.append('-I%s/gcc/libgo/runtime' % TINYGO)
+    cmd.append('-I%s/ports/%s' % (TINYGO, port))
+    cmd.append('-fplan9-extensions')
+
+def wrapActionCompileGo():
+    # Compile a Go package
+    cmd[0] = GCCGO
+    cmd.extend(FLAGS)
+    if MCU == 'esp32':
+        cmd.append('-mlongcalls')
+        cmd.append('-nostdlib')
+        cmd.append('-L%s/ports/%s/build' % (TINYGO, port))
+
+def wrapActionArMerge():
+    # Merge multiple object files together
+    cmd[0] = AR
+
+def wrapActionLink():
+    # Linking the executable
+    cmd[0] = CC
+    cmd.extend(FLAGS)
+    cmd.append('-Wl,--gc-sections')
+    if LTO:
+        cmd.append('-Wno-lto-type-mismatch')
+    cmd.append('%s/ports/%s/build/libruntime.a' % (TINYGO, port))
+    if MCU == 'esp32':
+        #cmd[0] = LD
+        cmd.append('-static')
+        cmd.append('-Wl,-EL')
+        cmd.append('-nostdlib')
+        cmd.append('-Wl,--start-group')
+        cmd.append(get_lib_path('libgcc.a'))
+        cmd.append(get_lib_path('libstdc++.a'))
+        cmd.append('-lcore')
+        cmd.append('-lnet80211')
+        cmd.append('-lphy')
+        cmd.append('-lrtc')
+        cmd.append('-lpp')
+        cmd.append('-lwpa')
+        cmd.append('-lsmartconfig')
+        cmd.append('-lcoexist')
+        cmd.append('-lwps')
+        cmd.append('-lwpa2')
+        cmd.append(SDK + '/components/newlib/lib/libc.a')
+        cmd.append(SDK + '/components/newlib/lib/libm.a')
+        cmd.append(SDK + '/components/' + port + '/libhal.a')
+        cmd.append('-Wl,--end-group')
+        cmd.append('-L%s/components/%s/ld' % (SDK, port))
+        cmd.append('-L%s/components/%s/lib' % (SDK, port))
+        cmd.append('-T')
+        cmd.append('%s/ports/%s/build/esp32_out.ld' % (TINYGO, port))
+        cmd.append('-T')
+        cmd.append('esp32.common.ld')
+        cmd.append('-T')
+        cmd.append('esp32.rom.ld')
+        cmd.append('-T')
+        cmd.append('esp32.rom.spiram_incompatible_fns.ld')
+        cmd.append('-T')
+        cmd.append('esp32.peripherals.ld')
+        if cmd[0] == LD: # fix up command when using ld directly
+            for i in range(len(cmd)):
+                if cmd[i].startswith('-Wl,'):
+                    cmd[i] = cmd[i][4:]
+
+cmd = sys.argv[:]
+
+# Figure out what we should wrap here
+if cmd[0].endswith('/gccgo'):
+    if '-c' in cmd:
+        wrapActionCompileGo()
+    else:
+        wrapActionLink()
+elif cmd[0].endswith('/gcc'):
+    wrapActionCompileC()
+elif cmd[0].endswith('/ar'):
+    wrapActionArMerge()
+else:
+    raise RuntimeError('unknown command: ' + cmd[0])
+
+# Run the command
+#print('tinygo:', ' '.join(cmd))
+sys.exit(subprocess.run(cmd).returncode)

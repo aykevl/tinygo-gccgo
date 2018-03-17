@@ -1,4 +1,4 @@
-[submodule "gofrontend"]
-	path = gofrontend
-	url = git@github.com:aykevl/gofrontend.git
-	branch = tinygo
+[submodule "gcc"]
+	path = gcc
+	url = git@github.com:gcc-mirror/gcc.git
+	branch = 4b5e15daff8b54440e3fda451c318ad31e532fab

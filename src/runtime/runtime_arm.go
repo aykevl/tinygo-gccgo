@@ -19,7 +19,7 @@ type stackframe struct {
 	pc uintptr      // r15
 }
 
-func unwind_frame(r *goroutine, frame *stackframe) string {
+func unwind_frame(frame *stackframe) string {
 	frame.pc = frame.lr
 	frame.lr = 0
 	if UNWINDER == "armdecode" {

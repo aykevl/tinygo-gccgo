@@ -1,10 +1,9 @@
 
 # Specify the build output directory. All object code will be stored in this
 # directory.
-BUILD=build
+BUILD = build
 
-# Define where to put the output binary
-OUT = $(BUILD)/$(PKG)
+PORT = unix
 
 FLAGS += -fomit-frame-pointer
 
@@ -18,29 +17,37 @@ ARCH_TUPLE = $(shell gcc -dumpmachine)
 ifneq (,$(findstring arm-,"$(ARCH_TUPLE)"))
 ARCH = arm
 else
-ARCH = other
+ARCH = otherarch
 endif
 
 SRC_C_PORT = main.c
+SRC_GO_RUNTIME += runtime.go
 
-all: mkdir $(OUT)
+DIRS += $(BUILD)/bin
 
-# Link the final executable.
-$(OUT): $(OBJ)
-	@echo "LINK $@"
-	$(Q)gcc $(LDFLAGS) -o $@ $^
+all: mkdir $(BUILD)/libruntime.a
 
-run: all
-	@echo "RUN  $(OUT)"
-	@$(OUT)
+# For anything other than build/libruntime.a
+$(BUILD)/%.a: build/libruntime.a
+	$(Q)../../tinygo build -o $@ $(patsubst $(BUILD)/%.a,%,$@)
 
 ######################
 #    Testing code    #
 ######################
 
+# Build the main package
+$(BUILD)/pkg/%.o: $(TOP)/src/%/*.go
+	@echo "Go   $@"
+	$(Q)gccgo $(GOFLAGS) -c -o $@ $^
+
+# Link the executable.
+$(BUILD)/bin/%: $(OBJ) $(BUILD)/pkg/%.o $(BUILD)/strconv.a
+	@echo "LINK $@"
+	$(Q)gcc $(LDFLAGS) -o $@ $^
+
 TEST_OUTPUT_FILE = $(BUILD)/test/$(PKG).txt
 
-$(BUILD)/test/%.txt: $(BUILD)/%
+$(BUILD)/test/%.txt: $(BUILD)/bin/%
 	@$< 2>&1 > $@
 
 # Test the current package.
@@ -49,7 +56,7 @@ test-pkg: mkdir $(BUILD)/test/$(PKG).txt $(TEST_OUTPUT_FILE)
 	@diff -u $(TOP)/tests/$(PKG).txt $(TEST_OUTPUT_FILE)
 	@echo OK
 
-test:
+test: all
 	$(TOP)/tests/run-tests
 
 include ../common/rules.mk

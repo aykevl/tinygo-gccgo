@@ -28,18 +28,17 @@ func main() {
 Running on an ARM machine (Raspberry Pi 3):
 
 ```
-$ make PKG=hello LTO=1
-[lots of build output]
+$ tinygo build -o hello ./src/hello/
 
-$ strip build/hello
+$ strip hello
 
-$ ./build/hello
+$ ./hello
 hello, world!
 
-$ /bin/ls -lh build/hello
+$ /bin/ls -lh hello
 -rwxrwxr-x 1 ayke ayke 5,5K mrt  9 23:43 build/hello
 
-$ size build/hello
+$ size hello
    text    data     bss     dec     hex filename
    1961     316      20    2297     8f9 build/hello
 ```
@@ -60,9 +59,8 @@ scheduler, memory allocator (no GC yet) and channel send/receive primitives.
 
 There are many.
 
-  * Works with gccgo 6.3 (Debian stretch), no other compiler versions have been
-    tested.
-  * Source files must be placed in a subdirectory of `src/`.
+  * Works with gccgo 6.3 (Debian stretch) and 5.2 (xtensa-esp32-elf), no other
+    compiler versions have been tested.
   * `recover()` has bugs (but seems to work somewhat).
   * No function names or line numbers in the `panic()` output, and no backtraces
     on anything except ARM. I would like to fix this at some time, but it will
@@ -71,7 +69,7 @@ There are many.
     ./build/example | egrep ' [tT] main\.'`).
   * No garbage collector, yet. Allocated memory is never freed.
   * Many types might not be implemented, but support will probably be pretty
-    easy to add by including the correct files from `gofrontend/libgo/runtime`.
+    easy to add by including the correct files from `gcc/libgo/runtime`.
   * The scheduler is pretty dumb right now. Passing messages between two
     goroutines is fast (on the Raspberry Pi 3 slightly faster than the standard
     Go compiler!) but any extra goroutine that is started will slow down any
@@ -80,10 +78,7 @@ There are many.
     really have an intention to implement this as it will complicate the
     scheduler and I don't want a complicated scheduler.
   * Most of the standard library doesn't build yet, in particular the `fmt`
-    package (which depends on a whole slew of other packages). Some leaf
-    packages will work when added to the Makefile manually.
-  * No automatic dependency installation, except for a few defined in the
-    Makefile.
+    package (which depends on a whole slew of other packages).
   * ... probably many more.
 
 ## Current status
@@ -100,31 +95,45 @@ Go, so I might need to adjust to that in the future.
 
 Dependencies:
 
-  * An ARM machine, like a Raspberry Pi. Making it work on anything else
-    (without backtrace support) should not be very difficult.
-  * GCCGO, tested version 6.3.
-  * An initialized gofrontend, run `git submodule update --init`.
+  * Installed `gcc` and `gccgo`, tested version 6.3.
+  * Installed `go` tool.
 
-Then just execute `make PKG=<dirname>` where dirname is the name of the
-directory (under `src/`), for example `make PKG=myproject`. You have to put your
-source files under `src/`. The executable is then put in the `build/` directory.
-You may want to enable link-time optimization with the `LTO=1` flag.
+Build steps:
+
+  * Fetch GCC sources (needed to build the runtime). Do this by running:
+
+        $ git submodule update --init
+
+  * Build the runtime. For example, for the `unix` target:
+
+        $ cd ports/unix
+        $ make -j8
+
+  * Add the `tinygo` script to your `$PATH`, for example by adding this project
+    directory to your `$PATH`.
+
+Now you can use `tinygo` just like you're used from the `go` tool, except that
+it is still very limited in which packages it can build.
 
 ## License
 
 The license is the same BSD 3-clause license as the one used for Go. See the
 LICENSE file for details.
 
+Some code has a different (but compatible) license. In particular, this project
+contains some code from the [MicroPython
+project](https://github.com/micropython/micropython) which is licensed under the
+MIT license.
+
 ## Bare metal support
 
-Requirements for porting this to bare-metal processors (e.g. ARM Cortex-M):
+There is initial (very limited) support for the
+[ESP32](https://en.wikipedia.org/wiki/ESP32). There is _some_ support for
+goroutines, but they crash easily when used. This may be a compiler bug (Go is
+probably untested for the Xtensa architecture), a compiler/runtime mismatch, or
+of course something wrong with my usage of tasks to implement goroutines.
+Nothing advanced like networking or even GPIO has been implemented yet.
 
-  * Replace all calls to `printf()` with something that logs to a serial
-    console.
-  * Implement a memory allocator, for example by copying [the one from
-    MicroPython](https://github.com/micropython/micropython/blob/master/py/gc.c).
-  * Implement context switching, probably using setjmp/longjmp (take a look at
-    how MicroPython does it).
 
 ## About the 'other' TinyGo
 

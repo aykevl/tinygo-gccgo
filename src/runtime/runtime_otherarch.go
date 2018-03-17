@@ -8,6 +8,6 @@ type stackframe struct {
 	pc uintptr
 }
 
-func unwind_frame(r *goroutine, frame *stackframe) string {
+func unwind_frame(frame *stackframe) string {
 	return "unimplemented"
 }

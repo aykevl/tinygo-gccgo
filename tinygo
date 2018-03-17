@@ -1,0 +1,66 @@
+#!/usr/bin/python3
+
+import sys
+import os
+import subprocess
+
+mcu = None
+lto = True # enabled by default
+
+args = sys.argv[:]
+
+# Pick up flags meant for us (that shouldn't be passed to the go toolchain).
+if len(args) >= 2:
+    if args[1] in ['build', 'install', 'run', 'test']: # probably an incomplete list
+        args.insert(2, '-compiler=gccgo')
+    i = 1
+    while i < len(args):
+        if args[i] == '-mcu':
+            args.pop(i)
+            mcu = args.pop(i)
+        elif args[i].startswith('-mcu='):
+            mcu = args.pop(i)[len('-mcu='):]
+        #elif args[i] == '-lto':
+        #    args.pop(i)
+        #    lto = True
+        else:
+            i += 1
+
+if mcu == 'esp32':
+    os.environ['GOOS'] = 'esp32'
+    os.environ['GOARCH'] = 'xtensa'
+elif mcu is not None:
+    print('unknown MCU:', mcu, file=sys.stdout)
+    sys.exit(1)
+
+# for tinygo-gccgo
+os.environ['TINYGO_LTO'] = str(int(lto))
+if mcu:
+    os.environ['TINYGO_MCU'] = mcu
+
+TINYGO = os.path.dirname(os.path.realpath(__file__))
+
+if 'TOOLCHAIN' not in os.environ:
+    if mcu == 'esp32':
+        os.environ['TOOLCHAIN'] = 'xtensa-esp32-elf-'
+TOOLCHAIN = os.environ.get('TOOLCHAIN', '')
+
+# Set up the environment
+args[0] = 'go'
+os.environ['PATH'] = TINYGO + '/bin:' + os.environ['PATH']
+
+# We're going to do some trickery with GOROOT and GOPATH here.
+# The thing is, Go by default does not build any packages that it finds in
+# GOROOT. And when it tries to link the executable, it takes precompiled
+# binaries from GOROOT - if they are there.
+# We're going to (ab)use this characteristic to exclude a few packages from the
+# standard library by putting dummy packages (currently runtime and syscall) in
+# the goroot directory. Then we add the actual standard library to GOPATH to so
+# they get built by the go tool anyway.
+# TODO: actually precompile the whole standard library so that these hacks
+# aren't necessary.
+os.environ['GOROOT'] = TINYGO + '/goroot' # set GOROOT to fake runtime etc. packages
+os.environ['GOPATH'] = os.environ.get('GOPATH', os.environ['HOME'] + '/go') # set default GOPATH
+os.environ['GOPATH'] += ':' + TINYGO + '/libgo' # append standard library
+
+sys.exit(subprocess.run(args).returncode)

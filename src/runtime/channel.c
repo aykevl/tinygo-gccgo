@@ -1,12 +1,13 @@
 
 #include "tinygo.h"
 
-void * __go_new_channel(void * type, uintptr_t size) {
+void * __go_new_channel(ChanType *type, uintptr_t size) {
 	channel_t *ch = tinygo_alloc(sizeof(channel_t));
 	return ch;
 }
 
-void __go_send_small(void * type, channel_t *ch, uint64_t value) {
+void __go_send_small(ChanType *type, Hchan *ch_in, uint64_t value) {
+	channel_t *ch = (channel_t*)ch_in;
 	DEBUG_printf("-> value %d on channel %p\n", (int)value, ch);
 
 	goroutine_work_counter++;
@@ -34,8 +35,10 @@ void __go_send_small(void * type, channel_t *ch, uint64_t value) {
 	DEBUG_printf("-> done\n");
 }
 
-bool chanrecv2(void * type, channel_t *ch, uint64_t *value) __asm__("runtime.chanrecv2");
-bool chanrecv2(void * type, channel_t *ch, uint64_t *value)  {
+bool chanrecv2(ChanType *type, Hchan *ch_in, byte *value_in) __asm__("runtime.chanrecv2");
+bool chanrecv2(ChanType *type, Hchan *ch_in, byte *value_in)  {
+	channel_t *ch = (channel_t*)ch_in;
+	uint64_t *value = (uint64_t*)value_in;
 	DEBUG_printf("<- receiving value from channel\n");
 	goroutine_work_counter++;
 	while (ch->state == CHAN_NULL) {
@@ -52,10 +55,11 @@ bool chanrecv2(void * type, channel_t *ch, uint64_t *value)  {
 	}
 }
 
-void __go_receive(void * type, channel_t *ch, uint64_t *value) {
+void __go_receive(ChanType *type, Hchan *ch, byte *value) {
 	chanrecv2(type, ch, value);
 }
 
-void __go_builtin_close(channel_t *ch) {
+void __go_builtin_close(Hchan *ch_in) {
+	channel_t *ch = (channel_t*)ch_in;
 	ch->state = CHAN_CLOSED;
 }

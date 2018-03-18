@@ -1,4 +1,4 @@
 
 #pragma once
 
-#define STACK_SIZE (4 * 1024) // 4kB, also see runtime.go
+#define STACK_SIZE (8 * 1024) // 8kB

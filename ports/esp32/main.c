@@ -12,7 +12,7 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 void app_main(void)
 {
 	//go_init(); // TODO
-	go_main();
+	tinygo_go(go_main, NULL, NULL);
 
 	// sleep forever
 	while (true) {

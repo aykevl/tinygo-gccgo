@@ -1,4 +1,4 @@
-// This file was originally taken from the MicroPython project.
+/* This file was originally taken from the MicroPython project. */
 
 /* Start bootloader config */
 #define CONFIG_FLASHMODE_DIO 1

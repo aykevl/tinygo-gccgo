@@ -6,7 +6,6 @@ import subprocess
 
 TOOLCHAIN = os.environ.get('TOOLCHAIN', '')
 TINYGO = os.path.dirname(os.path.realpath(__file__))
-SDK = os.environ['ESPIDF']
 MCU = os.environ.get('TINYGO_MCU') or None
 LTO = bool(int(os.environ.get('TINYGO_LTO')))
 
@@ -24,9 +23,9 @@ if parts[0] != TINYGO + '/bin':
 os.environ['PATH'] = ':'.join(parts[1:])
 
 # Common GCC flags. See: ports/common/vars.mk
-FLAGS = ['-Wall', '-Werror', '-Os']
+FLAGS = ['-Os', '-g', '-Wall', '-Werror', '-fno-strict-aliasing']
 if LTO:
-    FLAGS.extend(['-flto', '-fno-strict-aliasing'])
+    FLAGS.extend(['-flto'])
 else:
     FLAGS.extend(['-ffunction-sections', '-fdata-sections'])
 
@@ -68,12 +67,12 @@ def wrapActionLink():
     cmd[0] = CC
     cmd.extend(FLAGS)
     cmd.append('-Wl,--gc-sections')
-    if LTO:
-        cmd.append('-Wno-lto-type-mismatch')
+    cmd.append('-Wno-lto-type-mismatch')
     cmd.append('%s/ports/%s/build/libruntime.a' % (TINYGO, port))
     cmd.append('%s/ports/%s/build/syscall.o' % (TINYGO, port))
     if MCU == 'esp32':
         #cmd[0] = LD
+        SDK = os.environ['ESPIDF']
         cmd.append('-static')
         cmd.append('-Wl,-EL')
         cmd.append('-nostdlib')

@@ -20,9 +20,9 @@ if len(args) >= 2:
             mcu = args.pop(i)
         elif args[i].startswith('-mcu='):
             mcu = args.pop(i)[len('-mcu='):]
-        #elif args[i] == '-lto':
-        #    args.pop(i)
-        #    lto = True
+        elif args[i] == '-lto':
+            args.pop(i)
+            lto = True
         else:
             i += 1
 

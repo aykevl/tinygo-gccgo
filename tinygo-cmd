@@ -71,6 +71,7 @@ def wrapActionLink():
     if LTO:
         cmd.append('-Wno-lto-type-mismatch')
     cmd.append('%s/ports/%s/build/libruntime.a' % (TINYGO, port))
+    cmd.append('%s/ports/%s/build/syscall.o' % (TINYGO, port))
     if MCU == 'esp32':
         #cmd[0] = LD
         cmd.append('-static')

@@ -98,3 +98,16 @@ void tinygo_block() {
 void tinygo_fatal() {
 	exit(1);
 }
+
+void tinygo_semacquire(volatile uint32_t *addr, bool profile) {
+	// This is safe because TinyGo is single-threaded.
+	while (*addr == 0) {
+		tinygo_block();
+	}
+	*addr -= 1;
+}
+
+void tinygo_semrelease(volatile uint32_t *addr) {
+	// This is safe because TinyGo is single-threaded.
+	*addr += 1;
+}

@@ -63,3 +63,42 @@ void __go_builtin_close(Hchan *ch_in) {
 	channel_t *ch = (channel_t*)ch_in;
 	ch->state = CHAN_CLOSED;
 }
+
+uintptr_t reflect_chansend(ChanType *t, Hchan *c, byte *elem, bool nb) __asm__("reflect.chansend");
+uintptr_t reflect_chansend(ChanType *t, Hchan *c, byte *elem, bool nb) {
+	if (nb) {
+		runtime_throw("unimplemented: non-blocking reflect.chansend");
+	}
+	// TODO: what about larger values?
+	__go_send_small(t, c, *(uint64_t*)elem);
+	return true; // success (would be false if the channel blocks and nb is true)
+}
+
+struct reflect_chanrecv_return {
+	bool selected;
+	bool received;
+};
+struct reflect_chanrecv_return reflect_chanrecv(ChanType *t, Hchan *c, bool nb, byte *elem) __asm__("reflect.chanrecv");
+struct reflect_chanrecv_return reflect_chanrecv(ChanType *t, Hchan *c, bool nb, byte *elem) {
+	if (nb) {
+		runtime_throw("unimplemented: non-blocking reflect.chanrecv");
+	}
+	struct reflect_chanrecv_return ret = {true, true};
+	chanrecv2(t, c, elem);
+	return ret;
+}
+
+void reflect_chanclose(Hchan *ch_in) __asm__("reflect.chanclose");
+void reflect_chanclose(Hchan *ch_in) {
+	__go_builtin_close(ch_in);
+}
+
+int reflect_chancap(Hchan *ch_in) __asm__("reflect.chancap");
+int reflect_chancap(Hchan *ch_in) {
+	return 0; // TODO: must be changed when buffered channels are supported
+}
+
+int reflect_chanlen(Hchan *ch_in) __asm__("reflect.chanlen");
+int reflect_chanlen(Hchan *ch_in) {
+	return 0; // TODO: must be changed when buffered channels are supported
+}

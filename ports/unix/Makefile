@@ -23,13 +23,23 @@ endif
 SRC_C_PORT = main.c
 SRC_GO_RUNTIME += runtime.go
 
+OBJ += $(BUILD)/port/os.o
+
 DIRS += $(BUILD)/bin
 
-all: mkdir $(BUILD)/libruntime.a
+all: mkdir $(BUILD)/libruntime.a $(BUILD)/syscall.o
 
 # For anything other than build/libruntime.a
 $(BUILD)/%.a: build/libruntime.a
+	@echo "Go   $@"
 	$(Q)../../tinygo build -o $@ $(patsubst $(BUILD)/%.a,%,$@)
+
+SRC_GO_SYSCALL += syscall.go
+
+# Per-port packages
+$(BUILD)/port/os.o: os/os.go
+	@echo "Go   $@"
+	$(Q)$(GCCGO) $(GOFLAGS) -fgo-pkgpath=os -c -o $@ $^
 
 ######################
 #    Testing code    #

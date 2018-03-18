@@ -38,3 +38,18 @@ func tinygo_fatal() __asm__("tinygo_fatal")
 func GOMAXPROCS(n int) int {
 	return 1
 }
+
+type Func struct {
+}
+
+func FuncForPC(pc uintptr) *Func {
+	return nil; // TODO
+}
+
+func (f *Func) Name() string {
+	return "" // unreachable
+}
+
+func Caller(skip int) (pc uintptr, file string, line int, ok bool) {
+	return 0, "", 0, false; // TODO
+}

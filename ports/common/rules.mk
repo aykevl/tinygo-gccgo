@@ -20,7 +20,7 @@ $(BUILD)/pkg/runtime.a: $(SRC_GO_RUNTIME)
 	@echo "Go   $@"
 	$(Q)$(GCCGO) $(GOFLAGS) -fgo-pkgpath=runtime -c -o $@ $^
 
-$(BUILD)/syscall.o: $(TOP)/src/syscall/syscall.go
+$(BUILD)/syscall.o: $(SRC_GO_SYSCALL)
 	@echo "Go   $@"
 	$(Q)$(GCCGO) $(GOFLAGS) -fgo-pkgpath=syscall -c -o $@ $^
 

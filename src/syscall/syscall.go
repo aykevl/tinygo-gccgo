@@ -11,4 +11,9 @@ func (e Errno) Error() string {
 	return "errno: " + string(e)
 }
 
-const ENOENT = Errno(2)
+const (
+	EPERM  = Errno(1)
+	ENOENT = Errno(2)
+	EIO    = Errno(5)
+	EBADF  = Errno(9)
+)

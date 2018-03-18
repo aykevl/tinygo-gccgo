@@ -76,6 +76,8 @@ void tinygo_fatal(); // exit process or reset chip
 __attribute__((noreturn))
 void runtime_Panic(struct __go_empty_interface msg, bool fatal) __asm__("runtime.Panic");
 void tinygo_sleep(int64_t sleeptime) __asm__("time.Sleep");
+void tinygo_semacquire(volatile uint32_t *addr, bool profile) __asm__("sync.runtime_Semacquire");
+void tinygo_semrelease(volatile uint32_t *addr) __asm__("sync.runtime_Semrelease");
 
 extern void go_main() __asm__ ("main.main");
 

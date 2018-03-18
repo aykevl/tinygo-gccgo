@@ -23,3 +23,16 @@ String runtime_gostringnocopy(const byte *str)
 	s.len = runtime_findnull(str);
 	return s;
 }
+
+int runtime_stringiter(String s, int k) __asm__("runtime.stringiter");
+int runtime_stringiter(String s, int k) {
+	if (k >= s.len) {
+		return 0;
+	}
+
+	if (s.str[k] < 0x80) {
+		return k + 1;
+	}
+
+	runtime_throw("todo: stringiter");
+}

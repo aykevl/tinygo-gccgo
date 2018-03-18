@@ -75,9 +75,11 @@ SRC_C_LIBGO += \
 	go-byte-array-to-string.c \
 	go-can-convert-interface.c \
 	go-check-interface.c \
+	go-construct-map.c \
 	go-convert-interface.c \
 	go-copy.c \
 	go-eface-compare.c \
+	go-int-array-to-string.c \
 	go-int-to-string.c \
 	go-interface-compare.c \
 	go-make-slice.c \
@@ -88,8 +90,13 @@ SRC_C_LIBGO += \
 	go-memcmp.c \
 	go-new-map.c \
 	go-print.c \
+	go-reflect-call.c \
+	go-reflect-map.c \
+	go-rune.c \
 	go-runtime-error.c \
 	go-strcmp.c \
+	go-string-to-byte-array.c \
+	go-string-to-int-array.c \
 	go-strplus.c \
 	go-strslice.c \
 	go-type-complex.c \
@@ -100,15 +107,20 @@ SRC_C_LIBGO += \
 	go-type-interface.c \
 	go-type-string.c \
 	go-typedesc-equal.c \
+	go-unsafe-new.c \
+	go-unsafe-newarray.c \
+	go-unsafe-pointer.c
 
 # Runtime C sources from tinygo. These live in src/runtime.
 SRC_C_TINYGO = \
 	tinygo.c \
 	channel.c \
+	heap.c \
 	panic.c \
 	print.c \
 	libgo-go-iface.c \
 	libgo-map.c \
+	libgo-reflect.c \
 	libgo-runtime1.c \
 	libgo-string.c
 
@@ -117,6 +129,9 @@ SRC_C_TINYGO = \
 SRC_GO_RUNTIME += \
 	$(TOP)/src/runtime/runtime.go \
 	$(GCCREPO)/libgo/go/runtime/error.go
+
+SRC_GO_SYSCALL += \
+	$(TOP)/src/syscall/syscall.go
 
 # Architecture-specific files.
 SRC_C_TINYGO += tinygo_$(ARCH).c

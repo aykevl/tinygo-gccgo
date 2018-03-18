@@ -7,43 +7,6 @@
 
 size_t goroutine_work_counter = 0; // every time work happens, this is incremented
 
-void * tinygo_alloc(size_t size) {
-	// This zero-initializes the buffer for easy usage.
-	// TODO: allocate on GC heap
-	// TODO: check for out-of-memory
-	return calloc(1, size);
-}
-
-void tinygo_free(void *ptr) {
-	free(ptr);
-}
-
-// The size that will actually be allocated when doing tinygo_alloc(size).
-// Currently it's the same as the requested value, but in the future we
-// might have a GC that allocates with fixed block sizes, for example.
-size_t tinygo_roundupsize(size_t size) {
-	return size;
-}
-
-void * __go_new(void *type, uintptr_t size) {
-	if (size == 0) {
-		return &runtime_zerobase;
-	}
-	return tinygo_alloc(size);
-}
-
-void * __go_new_nopointers(void *type, uintptr_t size) {
-	return __go_new(type, size);
-}
-
-void * __go_alloc(uintptr_t size) {
-	return tinygo_alloc(size);
-}
-
-void __go_free(void * ptr) {
-	return tinygo_free(ptr);
-}
-
 // 'go' keyword
 G* __go_go(func fn, void *arg) {
 	uint32_t *created_by = 0;
@@ -86,18 +49,15 @@ void __gccgo_personality_v0() {
 	runtime_throw("unimplemented: __gccgo_personality_v0");
 }
 
-void * runtime_mallocgc(uintptr_t size, uintptr_t type, uint32_t flags) {
-	return tinygo_alloc(size);
-}
-
 uint32_t runtime_fastrand1() {
 	return 0; // TODO
 }
 
-uintptr_t runtime_roundupsize(uintptr_t size) {
-	return tinygo_roundupsize(size);
+bool sync_runtime_canSpin(int i) __asm__("sync.runtime_canSpin");
+bool sync_runtime_canSpin(int i) {
+	return false;
 }
 
-void __go_register_gc_roots(struct root_list *list) {
-	// TODO when we have a real GC
+void sync_runtime_doSpin() __asm__("sync.runtime_doSpin");
+void sync_runtime_doSpin() {
 }

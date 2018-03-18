@@ -28,7 +28,7 @@ func main() {
 Running on an ARM machine (Raspberry Pi 3):
 
 ```
-$ tinygo build -o hello ./src/hello/
+$ tinygo build -lto -o hello ./src/hello/
 
 $ strip hello
 
@@ -127,12 +127,38 @@ MIT license.
 
 ## Bare metal support
 
+### ESP32
+
 There is initial (very limited) support for the
-[ESP32](https://en.wikipedia.org/wiki/ESP32). There is _some_ support for
-goroutines, but they crash easily when used. This may be a compiler bug (Go is
-probably untested for the Xtensa architecture), a compiler/runtime mismatch, or
-of course something wrong with my usage of tasks to implement goroutines.
-Nothing advanced like networking or even GPIO has been implemented yet.
+[ESP32](https://en.wikipedia.org/wiki/ESP32). A blinky example:
+
+```go
+package main
+
+import (
+    "machine"
+    "time"
+)
+
+func main() {
+    led := machine.LED_BUILTIN
+    led.Configure(machine.GPIOConfig{Mode: machine.GPIO_OUTPUT})
+    high := false
+    for {
+        high = !high
+        led.Set(high)
+        time.Sleep(200 * time.Millisecond)
+    }
+}
+```
+
+Implemented so far:
+
+  * GPIO peripheral (only pin 2 and 4, others can be added easily)
+  * Goroutines
+  * Channels
+  * Sleep
+  * Stack overflow checking
 
 ## Other (similar) projects
 

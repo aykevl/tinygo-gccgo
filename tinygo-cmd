@@ -54,6 +54,10 @@ def wrapActionCompileGo():
         cmd.append('-mlongcalls')
         cmd.append('-nostdlib')
         cmd.append('-L%s/ports/%s/build' % (TINYGO, PORT))
+    if MCU and TINYGO + '/libgo/src/time/time.go' in cmd:
+        # Hack to add the time package to unsupported OSes (MCUs).
+        cmd.append(TINYGO + '/src/time/sys_other.go')
+        cmd.append(TINYGO + '/src/time/zoneinfo_other.go')
 
 def wrapActionArMerge():
     # Merge multiple object files together

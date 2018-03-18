@@ -10,11 +10,21 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
+static void tinygo_check_canary() {
+	if (goroutine->canary != STACK_CANARY) {
+		Eface err;
+		runtime_newErrorCString("stack overflow", &err);
+		runtime_Panic(err, true);
+	}
+}
+
 __attribute__((noreturn))
 void tinygo_goroutine_exit() {
 	goroutine_work_counter++;
 
 	DEBUG_printf("-- exit goroutine %d\n", goroutine->num);
+
+	tinygo_check_canary();
 
 	// cleanup goroutine
 	if (goroutine->next == goroutine) {
@@ -53,6 +63,10 @@ void tinygo_run_internal(func fn, void *arg) {
 void tinygo_go(void *fn, void *arg, void *created_by) {
 	static size_t goroutine_counter = 0;
 
+	if (goroutine != NULL) {
+		tinygo_check_canary();
+	}
+
 	// Allocate and init goroutine
 	goroutine_t *r = tinygo_alloc(sizeof(goroutine_t));
 	r->num = ++goroutine_counter;
@@ -84,11 +98,7 @@ void tinygo_block() {
 	if (goroutine == goroutine->next) {
 		tinygo_deadlocked();
 	}
-	if (goroutine->canary != STACK_CANARY) {
-		Eface err;
-		runtime_newErrorCString("stack overflow", &err);
-		runtime_Panic(err, true);
-	}
+	tinygo_check_canary();
 	goroutine_t *old = goroutine;
 	goroutine_t *new = goroutine->next;
 	goroutine = new;

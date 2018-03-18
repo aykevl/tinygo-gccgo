@@ -5,7 +5,7 @@ import os
 import subprocess
 
 mcu = None
-lto = True # enabled by default
+lto = False
 
 args = sys.argv[:]
 

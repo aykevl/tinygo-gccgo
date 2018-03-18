@@ -8,6 +8,9 @@ include ../common/vars.mk
 SRC_C_PORT += main.c
 SRC_GO_RUNTIME += runtime.go
 SRC_GO_OS += os.go
+SRC_GO_MACHINE += machine.go
+
+LIBS += $(BUILD)/machine.o
 
 all: mkdir $(LIBS) $(BUILD)/esp32_out.ld #$(BUILD)/bootloader.bin
 

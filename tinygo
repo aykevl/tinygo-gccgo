@@ -29,12 +29,16 @@ if len(args) >= 2:
 if mcu == 'esp32':
     os.environ['GOOS'] = 'esp32'
     os.environ['GOARCH'] = 'xtensa'
+    port = 'esp32'
 elif mcu is not None:
     print('unknown MCU:', mcu, file=sys.stdout)
     sys.exit(1)
+else:
+    port = 'unix'
 
 # for tinygo-gccgo
 os.environ['TINYGO_LTO'] = str(int(lto))
+os.environ['TINYGO_PORT'] = port
 if mcu:
     os.environ['TINYGO_MCU'] = mcu
 
@@ -62,5 +66,6 @@ os.environ['PATH'] = TINYGO + '/bin:' + os.environ['PATH']
 os.environ['GOROOT'] = TINYGO + '/goroot' # set GOROOT to fake runtime etc. packages
 os.environ['GOPATH'] = os.environ.get('GOPATH', os.environ['HOME'] + '/go') # set default GOPATH
 os.environ['GOPATH'] += ':' + TINYGO + '/libgo' # append standard library
+os.environ['GOPATH'] += ':%s/ports/%s/build' % (TINYGO, port)
 
 sys.exit(subprocess.run(args).returncode)

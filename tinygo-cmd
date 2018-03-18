@@ -8,6 +8,7 @@ TOOLCHAIN = os.environ.get('TOOLCHAIN', '')
 TINYGO = os.path.dirname(os.path.realpath(__file__))
 MCU = os.environ.get('TINYGO_MCU') or None
 LTO = bool(int(os.environ.get('TINYGO_LTO')))
+PORT = os.environ['TINYGO_PORT']
 
 CC    = TOOLCHAIN + 'gcc'
 GCCGO = TOOLCHAIN + 'gccgo'
@@ -36,17 +37,13 @@ def get_lib_path(name):
         sys.exit(cmd.returncode)
     return cmd.stdout.decode('utf-8').strip()
 
-port = 'unix'
-if MCU == 'esp32':
-    port = 'esp32'
-
 def wrapActionCompileC():
     # Compiling C code
     cmd[0] = CC
     cmd.extend(FLAGS)
     cmd.append('-I%s/goroot/src/runtime' % TINYGO)
     cmd.append('-I%s/gcc/libgo/runtime' % TINYGO)
-    cmd.append('-I%s/ports/%s' % (TINYGO, port))
+    cmd.append('-I%s/ports/%s' % (TINYGO, PORT))
     cmd.append('-fplan9-extensions')
 
 def wrapActionCompileGo():
@@ -56,7 +53,7 @@ def wrapActionCompileGo():
     if MCU == 'esp32':
         cmd.append('-mlongcalls')
         cmd.append('-nostdlib')
-        cmd.append('-L%s/ports/%s/build' % (TINYGO, port))
+        cmd.append('-L%s/ports/%s/build' % (TINYGO, PORT))
 
 def wrapActionArMerge():
     # Merge multiple object files together
@@ -68,9 +65,11 @@ def wrapActionLink():
     cmd.extend(FLAGS)
     cmd.append('-Wl,--gc-sections')
     cmd.append('-Wno-lto-type-mismatch')
-    cmd.append('%s/ports/%s/build/syscall.o' % (TINYGO, port))
-    cmd.append('%s/ports/%s/build/os.o' % (TINYGO, port))
-    cmd.append('%s/ports/%s/build/libruntime.a' % (TINYGO, port))
+    cmd.append('%s/ports/%s/build/syscall.o' % (TINYGO, PORT))
+    cmd.append('%s/ports/%s/build/os.o' % (TINYGO, PORT))
+    cmd.append('%s/ports/%s/build/libruntime.a' % (TINYGO, PORT))
+    if os.path.exists('%s/ports/%s/build/machine.o' % (TINYGO, PORT)):
+        cmd.append('%s/ports/%s/build/machine.o' % (TINYGO, PORT))
     if MCU == 'esp32':
         #cmd[0] = LD
         SDK = os.environ['ESPIDF']
@@ -92,12 +91,12 @@ def wrapActionLink():
         cmd.append('-lwpa2')
         cmd.append(SDK + '/components/newlib/lib/libc.a')
         cmd.append(SDK + '/components/newlib/lib/libm.a')
-        cmd.append(SDK + '/components/' + port + '/libhal.a')
+        cmd.append(SDK + '/components/' + PORT + '/libhal.a')
         cmd.append('-Wl,--end-group')
-        cmd.append('-L%s/components/%s/ld' % (SDK, port))
-        cmd.append('-L%s/components/%s/lib' % (SDK, port))
+        cmd.append('-L%s/components/%s/ld' % (SDK, PORT))
+        cmd.append('-L%s/components/%s/lib' % (SDK, PORT))
         cmd.append('-T')
-        cmd.append('%s/ports/%s/build/esp32_out.ld' % (TINYGO, port))
+        cmd.append('%s/ports/%s/build/esp32_out.ld' % (TINYGO, PORT))
         cmd.append('-T')
         cmd.append('esp32.common.ld')
         cmd.append('-T')

@@ -12,7 +12,7 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 void app_main(void)
 {
 	//go_init(); // TODO
-	tinygo_go(go_main, NULL, NULL);
+	go_main();
 
 	// sleep forever
 	while (true) {
@@ -50,12 +50,12 @@ void tinygo_go_internal(void *fn_in) {
 
 void tinygo_go(void *fn, void *arg, void *created_by) {
 	if (arg == NULL) {
-		xTaskCreate(tinygo_go_internal, "goroutine", STACK_SIZE / sizeof(uintptr_t), fn, 1, NULL);
+		xTaskCreate(tinygo_go_internal, "goroutine", CONFIG_MAIN_TASK_STACK_SIZE, fn, ESP_TASK_MAIN_PRIO, NULL);
 	} else {
 		// TODO: synchronisation.
 		go_params.fn = fn;
 		go_params.arg = arg;
-		xTaskCreate(tinygo_go_internal, "goroutine", STACK_SIZE / sizeof(uintptr_t), fn, 1, NULL);
+		xTaskCreate(tinygo_go_internal, "goroutine", CONFIG_MAIN_TASK_STACK_SIZE, fn, ESP_TASK_MAIN_PRIO, NULL);
 	}
 }
 

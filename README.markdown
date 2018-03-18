@@ -134,11 +134,22 @@ probably untested for the Xtensa architecture), a compiler/runtime mismatch, or
 of course something wrong with my usage of tasks to implement goroutines.
 Nothing advanced like networking or even GPIO has been implemented yet.
 
+## Other (similar) projects
 
-## About the 'other' TinyGo
+  * [libmigo](https://github.com/nutterts/libmigo): implements a bare-bones
+    libgo for an x86 kernel.
+  * [gopher-os](https://github.com/achilleasa/gopher-os]) appears to be still
+    alive. Also see the
+    [Golang UK Conference](https://www.youtube.com/watch?v=8T3VxGrrJwc) about it.
+  * There is another (now dead) project called 'tinygo'
+    [over here](https://code.google.com/archive/p/tinygo/) and
+    [here](https://github.com/jackmanlabs/tinygo) that tried to run a very old
+    variant of the runtime bare-metal. I only discovered it the moment I wanted
+    to push this project to GitHub.
+  * [gofy](http://gofy.cat-v.org/) is yet another kernel.
+    [Appears to be dead](https://groups.google.com/forum/#!topic/gofy/nVB1IHkc5Lg).
 
-There is another (now dead) project called 'tinygo' [over
-here](https://code.google.com/archive/p/tinygo/) and
-[here](https://github.com/jackmanlabs/tinygo) that tried to run a very old
-variant of the runtime bare-metal. I only discovered it the moment I wanted to
-push this project to GitHub.
+Note that most of these are meant for kernel development. Kernel development,
+although nice, is not the goal of TinyGo. Instead, the runtime should be kept as
+small as possible to eventually make it work on microcontrollers with much more
+limited resources.

@@ -7,6 +7,9 @@ import (
 	"unsafe"
 )
 
+const STACK_SIZE = 4 * 1024
+const STACK_SIZE_PTRS = STACK_SIZE / unsafe.Sizeof(uintptr)
+
 func tinygo_longjmp(*stackframe, uintptr) __asm__("tinygo_longjmp")
 func tinygo_setjmp(*stackframe, uintptr) __asm__("tinygo_setjmp")
 func tinygo_print_stackitem(r *goroutine, pc_top, pc_call uintptr, sp int) bool __asm__("tinygo_print_stackitem")

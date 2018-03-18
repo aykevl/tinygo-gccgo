@@ -5,9 +5,6 @@ import (
 	"unsafe"
 )
 
-const STACK_SIZE = 2 * 1024
-const STACK_SIZE_PTRS = STACK_SIZE / unsafe.Sizeof(uintptr)
-
 // One call to panic(), stacked in the goroutine.
 type panicElement struct {
 	msg     interface{}
@@ -37,6 +34,13 @@ func tinygo_fatal() __asm__("tinygo_fatal")
 
 func GOMAXPROCS(n int) int {
 	return 1
+}
+
+func GOROOT() string {
+	return "" // fake
+}
+
+func GC() {
 }
 
 type Func struct {

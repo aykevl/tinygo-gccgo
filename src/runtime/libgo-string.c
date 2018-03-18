@@ -6,6 +6,9 @@
 // gofrontend/libgo/runtime/string.goc and has been converted to C.
 
 #include "runtime.h"
+#include "go-string.h"
+
+#define charntorune(pv, str, len) __go_get_rune(str, len, pv)
 
 intgo runtime_findnull(const byte *s) {
 	if (s == NULL) {
@@ -27,12 +30,37 @@ String runtime_gostringnocopy(const byte *str)
 int runtime_stringiter(String s, int k) __asm__("runtime.stringiter");
 int runtime_stringiter(String s, int k) {
 	if (k >= s.len) {
+		// retk=0 is end of iteration
 		return 0;
 	}
 
-	if (s.str[k] < 0x80) {
+	int32 l = s.str[k];
+	if (l < 0x80) {
 		return k + 1;
 	}
 
-	runtime_throw("todo: stringiter");
+	// multi-char rune
+	return k + charntorune(&l, s.str+k, s.len-k);
+}
+
+struct stringiter2 { int retk; int32 retv; };
+struct stringiter2 stringiter2(String s, int k) __asm__("runtime.stringiter2");
+struct stringiter2 stringiter2(String s, int k) {
+	struct stringiter2 r;
+	if (k >= s.len) {
+		// retk=0 is end of iteration
+		r.retk = 0;
+		r.retv = 0;
+		return r;
+	}
+
+	r.retv = s.str[k];
+	if (r.retv < 0x80) {
+		r.retk = k + 1;
+		return r;
+	}
+
+	// multi-char rune
+	r.retk = k + charntorune(&r.retv, s.str+k, s.len-k);
+	return r;
 }

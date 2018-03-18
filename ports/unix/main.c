@@ -2,6 +2,7 @@
 #include "src/runtime/tinygo.h"
 
 int main(int argc, char **argv) {
+	go_init();
 	tinygo_go(go_main, NULL, NULL);
 	DEBUG_printf("-- starting with %u...\n", goroutine->num);
 	setcontext(&goroutine->context);

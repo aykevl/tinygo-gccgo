@@ -2,14 +2,11 @@
 # Specify the build output directory. All object code will be stored in this
 # directory.
 BUILD = build
-
 PORT = unix
-
-FLAGS += -fomit-frame-pointer
 
 include ../common/vars.mk
 
-.PHONY: all clean run mkdir test test-pkg
+.PHONY: all clean run mkdir test
 
 # Find the current architecture.
 # TODO: cross compilation
@@ -20,26 +17,22 @@ else
 ARCH = otherarch
 endif
 
+FLAGS += -fomit-frame-pointer
+
 SRC_C_PORT = main.c
 SRC_GO_RUNTIME += runtime.go
-
-OBJ += $(BUILD)/port/os.o
+SRC_GO_SYSCALL += syscall.go
+SRC_GO_OS += os.go
 
 DIRS += $(BUILD)/bin
 
-all: mkdir $(BUILD)/libruntime.a $(BUILD)/syscall.o
+all: mkdir $(LIBS)
 
 # For anything other than build/libruntime.a
-$(BUILD)/%.a: build/libruntime.a
+$(BUILD)/%.a:
 	@echo "Go   $@"
 	$(Q)../../tinygo build -o $@ $(patsubst $(BUILD)/%.a,%,$@)
 
-SRC_GO_SYSCALL += syscall.go
-
-# Per-port packages
-$(BUILD)/port/os.o: os/os.go
-	@echo "Go   $@"
-	$(Q)$(GCCGO) $(GOFLAGS) -fgo-pkgpath=os -c -o $@ $^
 
 ######################
 #    Testing code    #
@@ -48,23 +41,25 @@ $(BUILD)/port/os.o: os/os.go
 # Build the main package
 $(BUILD)/pkg/%.o: $(TOP)/src/%/*.go
 	@echo "Go   $@"
-	$(Q)gccgo $(GOFLAGS) -c -o $@ $^
+	$(Q)$(GCCGO) $(GOFLAGS) -c -o $@ $^
+
+TEST_OBJS = \
+	$(BUILD)/errors.a \
+	$(BUILD)/math.a \
+	$(BUILD)/strconv.a \
+	$(OBJ)
 
 # Link the executable.
-$(BUILD)/bin/%: $(OBJ) $(BUILD)/pkg/%.o $(BUILD)/strconv.a
+$(BUILD)/bin/%: $(BUILD)/pkg/%.o $(TEST_OBJS)
 	@echo "LINK $@"
-	$(Q)gcc $(LDFLAGS) -o $@ $^
-
-TEST_OUTPUT_FILE = $(BUILD)/test/$(PKG).txt
+	$(Q)$(CC) $(LDFLAGS) -o $@ $^
 
 $(BUILD)/test/%.txt: $(BUILD)/bin/%
+	@echo "RUN  $^"
 	@$< 2>&1 > $@
 
-# Test the current package.
-test-pkg: mkdir $(BUILD)/test/$(PKG).txt $(TEST_OUTPUT_FILE)
-	@echo testing package $(PKG)
-	@diff -u $(TOP)/tests/$(PKG).txt $(TEST_OUTPUT_FILE)
-	@echo OK
+# Keep Make from removing intermediary files
+.SECONDARY: $(TEST_OBJS)
 
 test: all
 	$(TOP)/tests/run-tests

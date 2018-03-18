@@ -11,6 +11,7 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 
 void app_main(void)
 {
+	//go_init(); // TODO
 	go_main();
 
 	// sleep forever
@@ -67,4 +68,18 @@ void tinygo_goroutine_exit() {
 void tinygo_block() {
 	// TODO: replace with actual locks / notifications
 	vTaskDelay(5);
+}
+
+void tinygo_semacquire(volatile uint32_t *addr, bool profile) {
+	runtime_throw("todo: semacquire");
+}
+
+void tinygo_semrelease(volatile uint32_t *addr) {
+	runtime_throw("todo: semrelease");
+}
+
+void tinygo_fatal() {
+	vTaskDelay(1000 / portTICK_PERIOD_MS);
+	// TODO: this only resets the CPUs, not the peripherals
+	esp_restart();
 }

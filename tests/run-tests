@@ -6,7 +6,9 @@ set -e
 
 for test in ../../tests/*.txt; do
     test=$(basename "$test" .txt) # get basename without .txt
-    make --no-print-directory PKG=$test test-pkg
+    make --no-print-directory build/test/$test.txt
+    diff -u ../../tests/$test.txt build/test/$test.txt
+    echo OK
     echo
 done
 

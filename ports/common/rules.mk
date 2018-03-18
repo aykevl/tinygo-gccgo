@@ -24,6 +24,10 @@ $(BUILD)/syscall.o: $(SRC_GO_SYSCALL)
 	@echo "Go   $@"
 	$(Q)$(GCCGO) $(GOFLAGS) -fgo-pkgpath=syscall -c -o $@ $^
 
+$(BUILD)/os.o: $(SRC_GO_OS) $(BUILD)/syscall.o
+	@echo "Go   $@"
+	$(Q)$(GCCGO) $(GOFLAGS) -fgo-pkgpath=os -c -o $@ $(SRC_GO_OS)
+
 # Build libgo C sources.
 # TODO: this uses gnu99 to work around undefined stack_t
 $(BUILD)/libgo/%.o: $(GCCREPO)/libgo/runtime/%.c

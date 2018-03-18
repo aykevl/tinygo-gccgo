@@ -25,7 +25,7 @@ INC += -I$(TOP)/ports/$(PORT)
 INC += -I$(TOP)
 CFLAGS += $(FLAGS) $(INC)
 CXXFLAGS += $(FLAGS) $(INC)
-GOFLAGS += $(FLAGS) -fno-split-stack
+GOFLAGS += $(FLAGS) -L$(BUILD) -fno-split-stack
 LDFLAGS += $(CFLAGS) -Wl,--gc-sections
 
 $(BUILD)/tinygo/%.o: CFLAGS += -I$(GCCREPO)/libgo/runtime
@@ -132,6 +132,14 @@ SRC_GO_RUNTIME += \
 
 SRC_GO_SYSCALL += \
 	$(TOP)/src/syscall/syscall.go
+
+SRC_GO_OS += \
+	$(TOP)/src/os/os.go
+
+LIBS += \
+	$(BUILD)/libruntime.a \
+	$(BUILD)/syscall.o \
+	$(BUILD)/os.o
 
 # Architecture-specific files.
 SRC_C_TINYGO += tinygo_$(ARCH).c

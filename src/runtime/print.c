@@ -21,12 +21,24 @@ void __go_print_string(const String s) {
 	tinygo_log((const char*)s.str, s.len);
 }
 
+void __go_print_bool(bool v) {
+	if (v) {
+		printf("true");
+	} else {
+		printf("false");
+	}
+}
+
 void __go_print_int64(int64_t n) {
 	printf("%" PRId64, n);
 }
 
 void __go_print_uint64(uint64_t n) {
 	printf("%" PRIu64, n);
+}
+
+void __go_print_double(double v) {
+	printf("%f", v);
 }
 
 void runtime_printf(const char *format, ...) {

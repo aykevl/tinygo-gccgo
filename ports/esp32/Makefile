@@ -1,15 +1,15 @@
 
 TOOLCHAIN = xtensa-esp32-elf-
-
 PORT = esp32
-
 BUILD = build
 
-all: mkdir $(BUILD)/libruntime.a $(BUILD)/esp32_out.ld $(BUILD)/syscall.o #$(BUILD)/bootloader.bin
-
-SRC_C_PORT = main.c
-
 include ../common/vars.mk
+
+SRC_C_PORT += main.c
+SRC_GO_RUNTIME += runtime.go
+SRC_GO_OS += os.go
+
+all: mkdir $(LIBS) $(BUILD)/esp32_out.ld #$(BUILD)/bootloader.bin
 
 $(BUILD)/esp32_out.ld: $(IDF_PATH)/components/esp32/ld/esp32.ld
 	@echo "CPP  $^"

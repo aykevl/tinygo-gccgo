@@ -68,8 +68,9 @@ def wrapActionLink():
     cmd.extend(FLAGS)
     cmd.append('-Wl,--gc-sections')
     cmd.append('-Wno-lto-type-mismatch')
-    cmd.append('%s/ports/%s/build/libruntime.a' % (TINYGO, port))
     cmd.append('%s/ports/%s/build/syscall.o' % (TINYGO, port))
+    cmd.append('%s/ports/%s/build/os.o' % (TINYGO, port))
+    cmd.append('%s/ports/%s/build/libruntime.a' % (TINYGO, port))
     if MCU == 'esp32':
         #cmd[0] = LD
         SDK = os.environ['ESPIDF']

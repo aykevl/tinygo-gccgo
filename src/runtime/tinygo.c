@@ -61,3 +61,24 @@ bool sync_runtime_canSpin(int i) {
 void sync_runtime_doSpin() __asm__("sync.runtime_doSpin");
 void sync_runtime_doSpin() {
 }
+
+void sync_runtime_Syncsemcheck() __asm__("sync.runtime_Syncsemcheck");
+void sync_runtime_Syncsemcheck() {
+	// this is only a sanity check, skip it
+}
+
+void sync_runtime_registerPoolCleanup(FuncVal *f) __asm__("sync.runtime_registerPoolCleanup");
+void sync_runtime_registerPoolCleanup(FuncVal *f) {
+	// not necessary?
+}
+
+bool math_hasSSE4() __asm__("math.hasSSE4");
+bool math_hasSSE4() {
+	return false;
+}
+
+__attribute__((weak))
+void syscall_init() __asm__("syscall..import");
+void syscall_init() {
+	// syscall doesn't seem to need initialization?
+}

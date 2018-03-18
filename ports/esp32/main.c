@@ -67,7 +67,7 @@ void tinygo_goroutine_exit() {
 
 void tinygo_block() {
 	// TODO: replace with actual locks / notifications
-	vTaskDelay(5);
+	taskYIELD();
 }
 
 void tinygo_semacquire(volatile uint32_t *addr, bool profile) {

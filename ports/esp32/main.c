@@ -83,3 +83,11 @@ void tinygo_fatal() {
 	// TODO: this only resets the CPUs, not the peripherals
 	esp_restart();
 }
+
+struct tinygo_now tinygo_now() {
+	struct tinygo_now ret;
+	int64_t micros = esp_timer_get_time();
+	ret.sec = micros / 1000 / 1000;
+	ret.nsec = (micros - (uint64_t)ret.sec * 1000ULL * 1000ULL) * 1000;
+	return ret;
+}

@@ -41,7 +41,7 @@ $(BUILD)/libgo/%.o: $(GCCREPO)/libgo/runtime/%.c
 # Build tinygo C sources.
 $(BUILD)/tinygo/%.o: $(TOP)/src/runtime/%.c
 	@echo "CC   $^"
-	$(Q)$(CC) $(CFLAGS) -std=c99 -fexceptions -c -o $@ $^
+	$(Q)$(CC) $(CFLAGS) -std=gnu99 -fexceptions -c -o $@ $^
 
 # Build port-specific C sources.
 $(BUILD)/port/%.o: $(TOP)/ports/$(PORT)/%.c

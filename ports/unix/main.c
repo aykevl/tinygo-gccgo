@@ -4,7 +4,7 @@
 int main(int argc, char **argv) {
 	go_init();
 	tinygo_go(go_main, NULL, NULL);
-	DEBUG_printf("-- starting with %u...\n", goroutine->num);
+	DEBUG_printf("-- starting with %zu...\n", goroutine->num);
 	setcontext(&goroutine->context);
 	__builtin_unreachable();
 	return 0;
@@ -22,7 +22,7 @@ __attribute__((noreturn))
 void tinygo_goroutine_exit() {
 	goroutine_work_counter++;
 
-	DEBUG_printf("-- exit goroutine %d\n", goroutine->num);
+	DEBUG_printf("-- exit goroutine %zd\n", goroutine->num);
 
 	tinygo_check_canary();
 
@@ -35,7 +35,7 @@ void tinygo_goroutine_exit() {
 		tinygo_free(goroutine);
 		exit(0);
 	}
-	goroutine_t *r = goroutine;
+	goroutine_t r = goroutine;
 	r->prev->next = r->next;
 	r->next->prev = r->prev;
 	goroutine = r->next;
@@ -46,7 +46,7 @@ void tinygo_goroutine_exit() {
 	// The goroutine data has been freed, so we're not allowed to touch it
 	// anymore. However, when we return here r->context.uc_link will still
 	// be accessed. So we do the context switch manually.
-	DEBUG_printf("-- resuming %d...\n", goroutine->num);
+	DEBUG_printf("-- resuming %zd...\n", goroutine->num);
 	setcontext(&goroutine->context);
 	__builtin_unreachable();
 }
@@ -68,7 +68,7 @@ void tinygo_go(void *fn, void *arg, void *created_by) {
 	}
 
 	// Allocate and init goroutine
-	goroutine_t *r = tinygo_alloc(sizeof(goroutine_t));
+	goroutine_t r = tinygo_alloc(sizeof(port_goroutine_t));
 	r->num = ++goroutine_counter;
 	r->created_by = created_by;
 	r->canary = STACK_CANARY;
@@ -79,7 +79,7 @@ void tinygo_go(void *fn, void *arg, void *created_by) {
 	r->context.uc_link = NULL;
 	makecontext(&r->context, (void(*)())tinygo_run_internal, 2, fn, arg);
 
-	DEBUG_printf("-- create goroutine %d\n", r->num);
+	DEBUG_printf("-- create goroutine %zd\n", r->num);
 
 	if (goroutine == NULL) {
 		goroutine = r;
@@ -99,10 +99,10 @@ void tinygo_block() {
 		tinygo_deadlocked();
 	}
 	tinygo_check_canary();
-	goroutine_t *old = goroutine;
-	goroutine_t *new = goroutine->next;
+	goroutine_t old = goroutine;
+	goroutine_t new = goroutine->next;
 	goroutine = new;
-	DEBUG_printf("-- switch from %d to %d...\n", old->num, new->num);
+	DEBUG_printf("-- switch from %zd to %zd...\n", old->num, new->num);
 	swapcontext(&old->context, &new->context);
 }
 

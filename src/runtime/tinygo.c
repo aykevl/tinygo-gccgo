@@ -22,29 +22,6 @@ void tinygo_call_fn(func fn, void *arg) {
 	fn(arg);
 }
 
-void __go_defer(bool *stackframe, func fn, void *arg) {
-	DEBUG_printf("deferring function at %p: %p (arg=%p)\n", stackframe, fn, arg);
-	defer_t *d = tinygo_alloc(sizeof(defer_t));
-	d->stackframe = stackframe;
-	d->fn = fn;
-	d->arg = arg;
-	d->next = goroutine->deferred;
-	goroutine->deferred = d;
-}
-
-void __go_undefer(bool *stackframe) {
-	DEBUG_printf("undeferring functions at frame %p\n", stackframe);
-	while (goroutine->deferred != NULL && goroutine->deferred->stackframe == stackframe) {
-		defer_t *d = goroutine->deferred;
-		d->fn(d->arg);
-		goroutine->deferred = d->next;
-	}
-}
-
-void __go_check_defer(bool *stackframe) {
-	runtime_throw("unimplemented: __go_check_defer");
-}
-
 void __gccgo_personality_v0() {
 	runtime_throw("unimplemented: __gccgo_personality_v0");
 }

@@ -9,12 +9,9 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 	return ESP_OK;
 }
 
-void machine_init() __asm__("machine..import");
-
 void app_main(void)
 {
-	//go_init(); // TODO
-	machine_init();
+	go_init();
 	go_main();
 
 	// sleep forever

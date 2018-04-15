@@ -1,5 +1,7 @@
 # TinyGo
 
+**This project is suspended**. See [Current status](#current-status) below.
+
 ## What is this?
 
 A runtime for the [Go programming language](https://golang.org/) that is very
@@ -82,6 +84,13 @@ There are many.
   * ... probably many more.
 
 ## Current status
+
+At the moment I'm **no longer working on this project**. The main reason is that
+it turns out that the code `gccgo` produces is relatively bloated and is written
+specifically for the regular Go runtime, which is optimized for speed and not
+RAM/flash usage. I'm investigating different options, like building a frontend
+for LLVM (like [llgo](https://github.com/llvm-mirror/llgo), which sadly appears
+to be dead).
 
 I mainly developed this as a proof of concept so I'm not sure how I'll continue,
 but I'm happy that it works (to some degree). I'm interested in microcontrollers

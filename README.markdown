@@ -1,6 +1,6 @@
-# TinyGo
+# TinyGo GCC (abandoned)
 
-**This project is suspended**. See [Current status](#current-status) below.
+**This project is abandoned**. See [Current status](#current-status) below.
 
 ## What is this?
 
@@ -88,14 +88,12 @@ There are many.
 At the moment I'm **no longer working on this project**. The main reason is that
 it turns out that the code `gccgo` produces is relatively bloated and is written
 specifically for the regular Go runtime, which is optimized for speed and not
-RAM/flash usage. I'm investigating different options, like building a frontend
-for LLVM (like [llgo](https://github.com/llvm-mirror/llgo), which sadly appears
-to be dead).
+RAM/flash usage. I'm now working on
+[a new implementation based on LLVM](https://github.com/aykevl/tinygo) just like
+[llgo](https://github.com/llvm-mirror/llgo).
 
-I mainly developed this as a proof of concept so I'm not sure how I'll continue,
-but I'm happy that it works (to some degree). I'm interested in microcontrollers
-and really like the Go language so may actually use it in the future, in which
-case I surely will improve it.
+This was mostly a proof of concept and I don't expect to be working on it in the
+future, but I'm happy that it works (to some degree).
 
 Also, it depends on gccgo and gccgo seems to be moving to a runtime written in
 Go, so I might need to adjust to that in the future.
